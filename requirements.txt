@@ -1,6 +1,7 @@
 dbt-core
 dbt-snowflake
-duckdb
+psycopg2-binary
+sqlalchemy
 pandas
 numpy
 matplotlib

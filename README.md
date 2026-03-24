@@ -2,7 +2,7 @@
 
 **[Live Interactive Dashboard](https://nicholasjh-work.github.io/feature-adoption-retention/)**
 
-dbt models and analytics for measuring how members adopt product features and how long they stay engaged. Builds on the synthetic data from [infra-data-pipelines](https://github.com/nicholasjh-work/infra-data-pipelines).
+dbt models and analytics for measuring how members adopt product features and how long they stay engaged. Builds on the synthetic data from [Infra-data-pipelines](https://github.com/nicholasjh-work/Infra-data-pipelines).
 
 ## Quick Start
 
@@ -11,9 +11,8 @@ git clone https://github.com/nicholasjh-work/feature-adoption-retention.git
 cd feature-adoption-retention
 pip install -r requirements.txt
 
-# Requires infra-data-pipelines demo.duckdb to exist
-# If not: cd ../infra-data-pipelines && python demo.py
-python demo.py --db ../infra-data-pipelines/demo.duckdb
+# Requires infra-data-pipelines demo to have run first (PostgreSQL loaded)
+python demo.py
 ```
 
 ## Demo Output
@@ -51,8 +50,6 @@ Overall retention:
 
 ### fct_feature_adoption
 
-Weekly adoption metrics for each product feature.
-
 | Column | Description |
 |--------|-------------|
 | `week_start` | Start of ISO week |
@@ -63,7 +60,7 @@ Weekly adoption metrics for each product feature.
 
 ### fct_retention_cohorts
 
-Point-in-time retention at 7, 30, and 90 days after signup. A member is "retained at D7" if they have activity between days 6-8, not cumulative activity before day 7.
+Point-in-time retention at 7, 30, and 90 days after signup.
 
 | Column | Description |
 |--------|-------------|
@@ -77,15 +74,15 @@ Point-in-time retention at 7, 30, and 90 days after signup. A member is "retaine
 
 ```bash
 cp profiles.yml.example ~/.dbt/profiles.yml
-cp .env.example .env    # Edit with credentials
+cp .env.example .env
 dbt build
 ```
 
 ## Related Repos
 
-- [infra-data-pipelines](https://github.com/nicholasjh-work/infra-data-pipelines) - Data generation and ingestion
-- [experimentation-segmentation](https://github.com/nicholasjh-work/experimentation-segmentation) - A/B testing and user segmentation
+- [Infra-data-pipelines](https://github.com/nicholasjh-work/Infra-data-pipelines) - Data generation and ingestion
+- [Experimentation-segmentation](https://github.com/nicholasjh-work/Experimentation-segmentation) - A/B testing and user segmentation
 
 ## Tech Stack
 
-dbt, Snowflake, DuckDB, Python, pandas, matplotlib
+dbt, Snowflake, PostgreSQL, Python, pandas, matplotlib, SQLAlchemy
