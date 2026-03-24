@@ -1,5 +1,7 @@
 # Feature Adoption & Retention
 
+**[Live Interactive Dashboard](https://nicholasjh-work.github.io/feature-adoption-retention/)**
+
 dbt models and analytics for measuring how members adopt product features and how long they stay engaged. Builds on the synthetic data from [infra-data-pipelines](https://github.com/nicholasjh-work/infra-data-pipelines).
 
 ## Quick Start
