@@ -1,0 +1,51 @@
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+    schema: RAW
+    tables:
+      - name: members
+      - name: daily_metrics
+      - name: feature_events
+
+models:
+  - name: fct_feature_adoption
+    description: "Weekly feature adoption metrics: unique users, new adopters, repeat users."
+    columns:
+      - name: week_start
+        tests:
+          - not_null
+      - name: feature
+        tests:
+          - not_null
+      - name: unique_users
+        tests:
+          - not_null
+      - name: new_adopters
+      - name: repeat_users
+    tests:
+      - unique:
+          column_name: "week_start || '-' || feature"
+
+  - name: fct_retention_cohorts
+    description: "Cohort retention at 7, 30, 90 days segmented by plan type and acquisition channel."
+    columns:
+      - name: plan_type
+        tests:
+          - not_null
+      - name: acquisition_channel
+        tests:
+          - not_null
+      - name: cohort_week
+        tests:
+          - not_null
+      - name: cohort_size
+        tests:
+          - not_null
+      - name: retention_d7
+      - name: retention_d30
+      - name: retention_d90
+    tests:
+      - unique:
+          column_name: "plan_type || '-' || acquisition_channel || '-' || cohort_week"

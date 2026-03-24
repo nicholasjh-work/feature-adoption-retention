@@ -1,0 +1,11 @@
+name: 'feature_adoption_retention'
+version: '1.0.0'
+config-version: 2
+profile: 'default'
+model-paths: ['models']
+docs-paths: ['docs']
+test-paths: ['tests']
+
+models:
+  feature_adoption_retention:
+    +materialized: table
