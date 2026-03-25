@@ -4,6 +4,7 @@ Usage:
     python demo.py
     python demo.py --db-url postgresql://user:pass@host/dbname
 """
+
 from __future__ import annotations
 
 import argparse
@@ -11,6 +12,7 @@ import os
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -86,53 +88,125 @@ def plot_feature_adoption(df, out_dir):
         fd = subset[subset["feature"] == feat].sort_values("week_start")
         axes[0].plot(fd["week_start"], fd["unique_users"], label=feat, linewidth=1.5)
     axes[0].set_title("Weekly Unique Users by Feature")
-    axes[0].set_xlabel("Week"); axes[0].set_ylabel("Unique Users")
-    axes[0].legend(fontsize=8); axes[0].tick_params(axis="x", rotation=45); axes[0].grid(True, alpha=0.3)
+    axes[0].set_xlabel("Week")
+    axes[0].set_ylabel("Unique Users")
+    axes[0].legend(fontsize=8)
+    axes[0].tick_params(axis="x", rotation=45)
+    axes[0].grid(True, alpha=0.3)
 
-    weekly = df.groupby("week_start")[["new_adopters", "repeat_users"]].sum().sort_index()
-    axes[1].bar(range(len(weekly)), weekly["new_adopters"], label="New Adopters", color="#3498db", alpha=0.8)
-    axes[1].bar(range(len(weekly)), weekly["repeat_users"], bottom=weekly["new_adopters"], label="Repeat Users", color="#2ecc71", alpha=0.8)
-    axes[1].set_title("New Adopters vs Repeat Users"); axes[1].set_xlabel("Week"); axes[1].set_ylabel("Users")
-    axes[1].legend(); axes[1].grid(True, alpha=0.3)
+    weekly = (
+        df.groupby("week_start")[["new_adopters", "repeat_users"]].sum().sort_index()
+    )
+    axes[1].bar(
+        range(len(weekly)),
+        weekly["new_adopters"],
+        label="New Adopters",
+        color="#3498db",
+        alpha=0.8,
+    )
+    axes[1].bar(
+        range(len(weekly)),
+        weekly["repeat_users"],
+        bottom=weekly["new_adopters"],
+        label="Repeat Users",
+        color="#2ecc71",
+        alpha=0.8,
+    )
+    axes[1].set_title("New Adopters vs Repeat Users")
+    axes[1].set_xlabel("Week")
+    axes[1].set_ylabel("Users")
+    axes[1].legend()
+    axes[1].grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(out_dir / "feature_adoption.png", dpi=150, bbox_inches="tight"); plt.close()
+    plt.savefig(out_dir / "feature_adoption.png", dpi=150, bbox_inches="tight")
+    plt.close()
     print(f"  Saved {out_dir}/feature_adoption.png")
 
 
 def plot_retention_heatmap(df, out_dir):
-    agg = df.groupby("cohort_week").agg({"cohort_size":"sum","active_d7":"sum","active_d30":"sum","active_d90":"sum"}).sort_index()
-    agg["r7"] = agg["active_d7"]/agg["cohort_size"]
-    agg["r30"] = agg["active_d30"]/agg["cohort_size"]
-    agg["r90"] = agg["active_d90"]/agg["cohort_size"]
+    agg = (
+        df.groupby("cohort_week")
+        .agg(
+            {
+                "cohort_size": "sum",
+                "active_d7": "sum",
+                "active_d30": "sum",
+                "active_d90": "sum",
+            }
+        )
+        .sort_index()
+    )
+    agg["r7"] = agg["active_d7"] / agg["cohort_size"]
+    agg["r30"] = agg["active_d30"] / agg["cohort_size"]
+    agg["r90"] = agg["active_d90"] / agg["cohort_size"]
     agg = agg.head(20)
-    data = agg[["r7","r30","r90"]].values
-    labels = [str(d.date()) if hasattr(d,'date') else str(d)[:10] for d in agg.index]
+    data = agg[["r7", "r30", "r90"]].values
+    labels = [str(d.date()) if hasattr(d, "date") else str(d)[:10] for d in agg.index]
     fig, ax = plt.subplots(figsize=(10, 8))
     im = ax.imshow(data, cmap="YlGn", aspect="auto", vmin=0, vmax=1)
-    ax.set_xticks([0,1,2]); ax.set_xticklabels(["D7","D30","D90"])
-    ax.set_yticks(range(len(labels))); ax.set_yticklabels(labels, fontsize=8)
-    ax.set_title("Cohort Retention Heatmap"); ax.set_xlabel("Retention Window"); ax.set_ylabel("Cohort Week")
+    ax.set_xticks([0, 1, 2])
+    ax.set_xticklabels(["D7", "D30", "D90"])
+    ax.set_yticks(range(len(labels)))
+    ax.set_yticklabels(labels, fontsize=8)
+    ax.set_title("Cohort Retention Heatmap")
+    ax.set_xlabel("Retention Window")
+    ax.set_ylabel("Cohort Week")
     for i in range(len(labels)):
         for j in range(3):
-            ax.text(j, i, f"{data[i,j]:.0%}", ha="center", va="center", color="white" if data[i,j]>0.6 else "black", fontsize=8)
-    plt.colorbar(im, ax=ax, label="Retention Rate"); plt.tight_layout()
-    plt.savefig(out_dir / "retention_heatmap.png", dpi=150, bbox_inches="tight"); plt.close()
+            ax.text(
+                j,
+                i,
+                f"{data[i,j]:.0%}",
+                ha="center",
+                va="center",
+                color="white" if data[i, j] > 0.6 else "black",
+                fontsize=8,
+            )
+    plt.colorbar(im, ax=ax, label="Retention Rate")
+    plt.tight_layout()
+    plt.savefig(out_dir / "retention_heatmap.png", dpi=150, bbox_inches="tight")
+    plt.close()
     print(f"  Saved {out_dir}/retention_heatmap.png")
 
 
 def plot_retention_by_plan(df, out_dir):
-    pr = df.groupby("plan_type").agg({"cohort_size":"sum","active_d7":"sum","active_d30":"sum","active_d90":"sum"})
-    for d in ["d7","d30","d90"]: pr[f"r_{d}"] = pr[f"active_{d}"] / pr["cohort_size"]
-    colors = {"free":"#e74c3c","pro":"#3498db","enterprise":"#2ecc71"}
+    pr = df.groupby("plan_type").agg(
+        {
+            "cohort_size": "sum",
+            "active_d7": "sum",
+            "active_d30": "sum",
+            "active_d90": "sum",
+        }
+    )
+    for d in ["d7", "d30", "d90"]:
+        pr[f"r_{d}"] = pr[f"active_{d}"] / pr["cohort_size"]
+    colors = {"free": "#e74c3c", "pro": "#3498db", "enterprise": "#2ecc71"}
     fig, ax = plt.subplots(figsize=(10, 6))
-    for plan in ["free","pro","enterprise"]:
+    for plan in ["free", "pro", "enterprise"]:
         if plan in pr.index:
-            ax.plot([0,7,30,90], [1.0, float(pr.loc[plan,"r_d7"]), float(pr.loc[plan,"r_d30"]), float(pr.loc[plan,"r_d90"])],
-                    "o-", label=plan.title(), color=colors[plan], linewidth=2)
-    ax.set_title("Retention Curves by Plan Type"); ax.set_xlabel("Days Since Signup"); ax.set_ylabel("Retention Rate")
-    ax.set_ylim(0, 1.05); ax.yaxis.set_major_formatter(mticker.PercentFormatter(1.0)); ax.legend(); ax.grid(True, alpha=0.3)
+            ax.plot(
+                [0, 7, 30, 90],
+                [
+                    1.0,
+                    float(pr.loc[plan, "r_d7"]),
+                    float(pr.loc[plan, "r_d30"]),
+                    float(pr.loc[plan, "r_d90"]),
+                ],
+                "o-",
+                label=plan.title(),
+                color=colors[plan],
+                linewidth=2,
+            )
+    ax.set_title("Retention Curves by Plan Type")
+    ax.set_xlabel("Days Since Signup")
+    ax.set_ylabel("Retention Rate")
+    ax.set_ylim(0, 1.05)
+    ax.yaxis.set_major_formatter(mticker.PercentFormatter(1.0))
+    ax.legend()
+    ax.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(out_dir / "retention_by_plan.png", dpi=150, bbox_inches="tight"); plt.close()
+    plt.savefig(out_dir / "retention_by_plan.png", dpi=150, bbox_inches="tight")
+    plt.close()
     print(f"  Saved {out_dir}/retention_by_plan.png")
 
 
@@ -149,12 +223,20 @@ def main():
     print(f"  {len(adf):,} rows")
     top5 = adf.groupby("feature")["unique_users"].sum().nlargest(5)
     print(f"\n  Top 5 features:")
-    for feat, cnt in top5.items(): print(f"    {feat:30s}  {cnt:>6,}")
+    for feat, cnt in top5.items():
+        print(f"    {feat:30s}  {cnt:>6,}")
 
     print("\nBuilding fct_retention_cohorts...")
     rdf = build_retention_cohorts(engine)
     print(f"  {len(rdf):,} rows")
-    t = rdf.agg({"cohort_size":"sum","active_d7":"sum","active_d30":"sum","active_d90":"sum"})
+    t = rdf.agg(
+        {
+            "cohort_size": "sum",
+            "active_d7": "sum",
+            "active_d30": "sum",
+            "active_d90": "sum",
+        }
+    )
     print(f"\n  Overall retention:")
     print(f"    D7:  {t['active_d7']/t['cohort_size']:.1%}")
     print(f"    D30: {t['active_d30']/t['cohort_size']:.1%}")

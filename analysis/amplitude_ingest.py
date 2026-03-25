@@ -8,6 +8,7 @@ environment variable.
 
 See Amplitude’s documentation for guidance on batching and rate limits.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -19,7 +20,6 @@ from typing import Dict, List
 
 import pandas as pd
 import requests
-
 
 AMPLITUDE_ENDPOINT = "https://api2.amplitude.com/2/httpapi"
 
@@ -84,4 +84,5 @@ def main(args: List[str]) -> None:
 
 if __name__ == "__main__":  # pragma: no cover
     import sys
+
     main(sys.argv[1:])
