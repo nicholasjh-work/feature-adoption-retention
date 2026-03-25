@@ -44,7 +44,7 @@ def ingest_events(csv_path: Path, dry_run: bool = False) -> None:
         )
     df = pd.read_csv(csv_path)
     events: List[Dict[str, object]] = []
-    for idx, row in df.iterrows():
+    for _idx, row in df.iterrows():
         event = {
             "user_id": str(row["member_id"]),
             "event_type": row["event_name"],
